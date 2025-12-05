@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:pomodoro_app/data/pom_model.dart';
 
 class TimerScreen extends StatefulWidget {
-  const TimerScreen({super.key});
+  final PomodoroConfig config;
+
+  const TimerScreen({super.key, required this.config});
   
   @override
   State<TimerScreen> createState(){
@@ -10,48 +13,88 @@ class TimerScreen extends StatefulWidget {
   }
 }
 
+
 class _TimerScreenState extends State<TimerScreen> {
-  // Variables and functions for TimerScreen can be added here
-// Variables and functions
-  int workMinutes = 25;
-  int breakMinutes = 5;
-  int sets = 4;
-  int _totalSeconds = 25 * 60;
 
-  int minutes =25;
-  int seconds =0;
-  String minutesStr ='';
-  String secondsStr ='';
+// Variables
+  int _secondsRemaining = 0;
+  bool _isWorkSesh = true;
+  bool _isRunning = false;
+  Timer?_timer; // can be null whilst developing
 
-  late Timer _timer;
-  void uptdateClock(){
+// Functions
+@override
+  void initState(){
+    super.initState();
+    _resetTimer();
+  }
+  void _resetTimer(){
+    if(_timer != null){
+      _timer!.cancel();
+    }
     setState(() {
-      minutes = _totalSeconds ~/60;
-      seconds = _totalSeconds %60;
-      minutesStr = minutes.toString().padLeft(2,'0');
-      secondsStr = seconds.toString().padLeft(2,'0');
+      _isRunning = false;
+      _isWorkSesh = true;
+      _secondsRemaining = widget.config.totalSeconds;
     });
   }
-  void startTimer() {
+
+  void _startTimer(){
+    if(_isRunning){
+      _pauseTimer();
+      return;
+    }
+    setState(() {
+      _isRunning = true;
+    });
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if(_totalSeconds==0){
+      if(_secondsRemaining > 0){
         setState(() {
-          timer.cancel();
+          _secondsRemaining--;
         });
-      }else{
-        setState(() {
-          uptdateClock();
-          _totalSeconds--;
-        });
+      } else {
+          _nextSession();
       }
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _timer.cancel();
+  void _pauseTimer(){
+    setState(() {
+      _isRunning = false;
+    });
+    _timer?.cancel();
   }
+
+  void _nextSession(){
+    if(_isWorkSesh){
+      setState(() {
+        _isWorkSesh = false;
+        _secondsRemaining = widget.config.breakSeconds;
+      });
+    }else{
+      _timer?.cancel();
+      setState(() {
+        _isRunning = false;
+      });
+    }
+  }
+
+String _formatTime(int totalSeconds){
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2,'0')}:${seconds.toString().padLeft(2,'0')}';
+  }
+
+@override
+  void dispose(){
+    _timer?.cancel();
+    super.dispose();
+  }
+
+
+
+// Widget Design
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -72,7 +115,7 @@ class _TimerScreenState extends State<TimerScreen> {
               ),
             ),
             Text(
-              '$minutesStr:$secondsStr',
+              _formatTime(_secondsRemaining),
               style: const TextStyle(
                 fontSize: 72,
                 color: Colors.white,
@@ -82,21 +125,18 @@ class _TimerScreenState extends State<TimerScreen> {
             const SizedBox(height: 40),
             // Start/Pause Button
             ElevatedButton(
-              onPressed: () {
-                startTimer();
-              },
+              onPressed: _startTimer,
               style: ElevatedButton.styleFrom(
-                
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.purple,
+                backgroundColor: _isRunning ? Colors.red : Colors.white,
+                foregroundColor: _isRunning ? Colors.white : Colors.purple,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              child: const Text(
-                'Start',
-                style: TextStyle(
+              child: Text(
+                _isRunning ? 'PAUSE' : 'START',
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
