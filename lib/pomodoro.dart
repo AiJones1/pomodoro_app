@@ -15,7 +15,7 @@ class _PomodoroState extends State<Pomodoro> {
 
 // Variables
   var activeScreen = 'timer-screen';
-  late PomodoroConfig _currentConfig = PresetConfigs.defaultConfig;
+  late final PomodoroConfig _currentConfig = PresetConfigs.defaultConfig;
 
 // Functions
   void switchScreen(String screenIdentifier){

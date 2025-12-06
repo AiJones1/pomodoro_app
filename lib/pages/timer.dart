@@ -20,6 +20,12 @@ class _TimerScreenState extends State<TimerScreen> {
   int _secondsRemaining = 0;
   bool _isWorkSesh = true;
   bool _isRunning = false;
+  
+  int totalSets = 4;      // Initially hard coded, may allow users to change later
+
+  // Tracking stage of pomodoro
+  int _currentSet = 1;
+
   Timer?_timer; // can be null whilst developing
 
 // Functions
@@ -36,6 +42,7 @@ class _TimerScreenState extends State<TimerScreen> {
       _isRunning = false;
       _isWorkSesh = true;
       _secondsRemaining = widget.config.totalSeconds;
+      _currentSet = 1;
     });
   }
 
@@ -73,11 +80,26 @@ class _TimerScreenState extends State<TimerScreen> {
         _secondsRemaining = widget.config.breakSeconds;
       });
     }else{
+      if(_currentSet < totalSets){
+        // Check if more sets remain
+        setState(() {
+          _currentSet++;
+          _isWorkSesh = true;
+          _secondsRemaining = widget.config.totalSeconds;
+        });
+        // Else end pomodoro
+      } else {
       _timer?.cancel();
-      setState(() {
-        _isRunning = false;
-      });
+        setState(() {
+          _resetTimer();
+          _isRunning = false;
+        });
+     } 
     }
+  }
+double _updateProgress(){
+    double total = _isWorkSesh ? widget.config.totalSeconds.toDouble() : widget.config.breakSeconds.toDouble();
+    return _secondsRemaining / total;
   }
 
 String _formatTime(int totalSeconds){
@@ -85,6 +107,14 @@ String _formatTime(int totalSeconds){
     int seconds = totalSeconds % 60;
     return '${minutes.toString().padLeft(2,'0')}:${seconds.toString().padLeft(2,'0')}';
   }
+
+String _sessionType(){
+    return _isWorkSesh ? 'Focus' : 'Relax';
+  } 
+
+void testButton(){
+  _nextSession();
+}
 
 @override
   void dispose(){
@@ -105,20 +135,53 @@ String _formatTime(int totalSeconds){
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Pomodoro Timer Display
-            // Based on set text for: Study / Rest
-            Text(
-              'Time remaining',
-              style: TextStyle(
-                fontSize: 32,
-                color: Colors.purple[200],
-                fontWeight: FontWeight.bold,
-              ),
+
+            // Circular progress indicator
+            Stack(
+              alignment: Alignment.center,
+              children:[
+                CircularProgressIndicator(
+                  value: _updateProgress(),
+                  backgroundColor: const Color.fromARGB(255, 71, 71, 71),
+                  color: _isWorkSesh ? 
+                    const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 125, 192, 255),
+                  strokeWidth: 10,
+                  constraints: BoxConstraints.expand(
+                    width: 320,
+                    height: 320,
+                    // Adjust size as needed for various phone (tested on pixel 9pro xl)
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                      Text(
+                        _sessionType(),
+                        style: TextStyle(
+                          fontSize: 32,
+                          color: Colors.purple[200],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      // Formatted timer string
+                      Text(
+                        _formatTime(_secondsRemaining),
+                        style: const TextStyle(
+                          fontSize: 72,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
+                ) 
+              ] 
             ),
+            const SizedBox(height: 40),
             Text(
-              _formatTime(_secondsRemaining),
-              style: const TextStyle(
-                fontSize: 72,
-                color: Colors.white,
+              'Set $_currentSet of $totalSets',
+              style: TextStyle(
+                fontSize: 24,
+                color: Colors.purple[200],
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -142,6 +205,7 @@ String _formatTime(int totalSeconds){
                 ),
               ),
             ),
+            ElevatedButton(onPressed: testButton, child: const Text('TEST')),
           ],
         ),
       ),
