@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:pomodoro_app/data/pom_model.dart';
+import 'package:pomodoro_app/components/todo_list.dart';
 
 class TimerScreen extends StatefulWidget {
   final PomodoroConfig config;
@@ -27,6 +28,13 @@ class _TimerScreenState extends State<TimerScreen> {
   int _currentSet = 1;
 
   Timer?_timer; // can be null whilst developing
+
+  // To do list items
+  List<String> todoItems = [
+    'Example Task 1',
+    'Example Task 2',
+    'Example Task 3',
+  ];
 
 // Functions
 @override
@@ -206,6 +214,8 @@ void testButton(){
               ),
             ),
             ElevatedButton(onPressed: testButton, child: const Text('TEST')),
+            // Task list display
+            TodoList(items:   todoItems),
           ],
         ),
       ),
