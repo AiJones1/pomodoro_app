@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pomodoro_app/components/todo_item.dart';
 
 class TodoList extends StatefulWidget {
-  final List<String> items;
-
-  const TodoList({super.key, required this.items});
+  const TodoList({super.key});
 
   @override
   State<TodoList> createState() {
@@ -16,10 +14,10 @@ class _TodoListState extends State<TodoList> {
   // Variables
     // To do list items
   List<String> todoItems = [
-    'Example Task 1',
-    'Example Task 2',
-    'Example Task 3',
+    'Example Task 1'
   ];
+  List<String> completedItems =[];
+
   final TextEditingController _textFieldController = TextEditingController();
   bool _isAddingItem = false;
 
@@ -47,7 +45,25 @@ class _TodoListState extends State<TodoList> {
       });
     }
 
+// Handle when an item is checked (marked as completed)
+  void _onItemCompleted(int index) {
+    setState(() {
+      final item = todoItems[index];
+      completedItems.add(item);
 
+      
+      // Optional: You can remove the item from todoItems if you want
+      // todoItems.removeAt(index);
+    });
+  }
+
+  // Handle when an item is unchecked (marked as active again)
+  void _onItemUncompleted(int index) {
+    setState(() {
+      final item = todoItems[index];
+      completedItems.remove(item);
+    });
+  }
 
 
   @override
@@ -67,7 +83,19 @@ class _TodoListState extends State<TodoList> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    TodoItem(items: todoItems),
+                    Column(
+                      children: todoItems.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final item = entry.value;
+                        
+                        return TodoItem(
+                          item: item,
+                          index: index,
+                          onItemCompleted: _onItemCompleted,
+                          onItemUncompleted: _onItemUncompleted,
+                        );
+                      }).toList(),
+                    ),
                     const SizedBox(height: 10),
 
 

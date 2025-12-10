@@ -29,13 +29,6 @@ class _TimerScreenState extends State<TimerScreen> {
 
   Timer?_timer; // can be null whilst developing
 
-  // To do list items
-  List<String> todoItems = [
-    'Example Task 1',
-    'Example Task 2',
-    'Example Task 3',
-  ];
-
 // Functions
 @override
   void initState(){
@@ -215,7 +208,7 @@ void testButton(){
             ),
             ElevatedButton(onPressed: testButton, child: const Text('TEST')),
             // Task list display
-            TodoList(items:   todoItems),
+            TodoList(),
           ],
         ),
       ),
