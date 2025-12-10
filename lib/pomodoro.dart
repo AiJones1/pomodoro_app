@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pomodoro_app/data/pom_model.dart';
 import 'package:pomodoro_app/pages/timer.dart';
 
 class Pomodoro extends StatefulWidget {
@@ -14,6 +15,7 @@ class _PomodoroState extends State<Pomodoro> {
 
 // Variables
   var activeScreen = 'timer-screen';
+  late final PomodoroConfig _currentConfig = PresetConfigs.defaultConfig;
 
 // Functions
   void switchScreen(String screenIdentifier){
@@ -21,11 +23,16 @@ class _PomodoroState extends State<Pomodoro> {
       activeScreen = screenIdentifier;
     });
   }
+  // void _selectConfig(PomodoroConfig config) {
+  //   setState(() {
+  //     _currentConfig = config;
+  //   });
+  // }
 
 // Elements and styles  
   @override
   Widget build( context) {
-    Widget screenWidget = TimerScreen(); // Update later to be welcome screen or setup
+    Widget screenWidget = TimerScreen(config: _currentConfig); // Update later to be welcome screen or setup
 
 
     return MaterialApp(
@@ -41,13 +48,13 @@ class _PomodoroState extends State<Pomodoro> {
               ],
             ),
           ),
-          child: const Center(
-            child: TimerScreen(),
+          child: Center(
+            child: screenWidget,
             // Change to screenWidget when more screens are added
           ),
         ),
       ),
-    );   
+    ); 
   }
 }
 

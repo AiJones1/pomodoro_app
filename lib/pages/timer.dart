@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:pomodoro_app/data/pom_model.dart';
+import 'package:pomodoro_app/components/todo_list.dart';
 
 class TimerScreen extends StatefulWidget {
-  const TimerScreen({super.key});
+  final PomodoroConfig config;
+
+  const TimerScreen({super.key, required this.config});
   
   @override
   State<TimerScreen> createState(){
@@ -10,48 +14,118 @@ class TimerScreen extends StatefulWidget {
   }
 }
 
+
 class _TimerScreenState extends State<TimerScreen> {
-  // Variables and functions for TimerScreen can be added here
-// Variables and functions
-  int workMinutes = 25;
-  int breakMinutes = 5;
-  int sets = 4;
-  int _totalSeconds = 25 * 60;
 
-  int minutes =25;
-  int seconds =0;
-  String minutesStr ='';
-  String secondsStr ='';
+// Variables
+  int _secondsRemaining = 0;
+  bool _isWorkSesh = true;
+  bool _isRunning = false;
+  
+  int totalSets = 4;      // Initially hard coded, may allow users to change later
 
-  late Timer _timer;
-  void uptdateClock(){
+  // Tracking stage of pomodoro
+  int _currentSet = 1;
+
+  Timer?_timer; // can be null whilst developing
+
+// Functions
+@override
+  void initState(){
+    super.initState();
+    _resetTimer();
+  }
+  void _resetTimer(){
+    if(_timer != null){
+      _timer!.cancel();
+    }
     setState(() {
-      minutes = _totalSeconds ~/60;
-      seconds = _totalSeconds %60;
-      minutesStr = minutes.toString().padLeft(2,'0');
-      secondsStr = seconds.toString().padLeft(2,'0');
+      _isRunning = false;
+      _isWorkSesh = true;
+      _secondsRemaining = widget.config.totalSeconds;
+      _currentSet = 1;
     });
   }
-  void startTimer() {
+
+  void _startTimer(){
+    if(_isRunning){
+      _pauseTimer();
+      return;
+    }
+    setState(() {
+      _isRunning = true;
+    });
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if(_totalSeconds==0){
+      if(_secondsRemaining > 0){
         setState(() {
-          timer.cancel();
+          _secondsRemaining--;
         });
-      }else{
-        setState(() {
-          uptdateClock();
-          _totalSeconds--;
-        });
+      } else {
+          _nextSession();
       }
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _timer.cancel();
+  void _pauseTimer(){
+    setState(() {
+      _isRunning = false;
+    });
+    _timer?.cancel();
   }
+
+  void _nextSession(){
+    if(_isWorkSesh){
+      setState(() {
+        _isWorkSesh = false;
+        _secondsRemaining = widget.config.breakSeconds;
+      });
+    }else{
+      if(_currentSet < totalSets){
+        // Check if more sets remain
+        setState(() {
+          _currentSet++;
+          _isWorkSesh = true;
+          _secondsRemaining = widget.config.totalSeconds;
+        });
+        // Else end pomodoro
+      } else {
+      _timer?.cancel();
+        setState(() {
+          _resetTimer();
+          _isRunning = false;
+        });
+     } 
+    }
+  }
+double _updateProgress(){
+    double total = _isWorkSesh ? widget.config.totalSeconds.toDouble() : widget.config.breakSeconds.toDouble();
+    return _secondsRemaining / total;
+  }
+
+String _formatTime(int totalSeconds){
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2,'0')}:${seconds.toString().padLeft(2,'0')}';
+  }
+
+String _sessionType(){
+    return _isWorkSesh ? 'Focus' : 'Relax';
+  } 
+
+void testButton(){
+  _nextSession();
+}
+
+@override
+  void dispose(){
+    _timer?.cancel();
+    super.dispose();
+  }
+
+
+
+// Widget Design
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -62,46 +136,79 @@ class _TimerScreenState extends State<TimerScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Pomodoro Timer Display
-            // Based on set text for: Study / Rest
-            Text(
-              'Time remaining',
-              style: TextStyle(
-                fontSize: 32,
-                color: Colors.purple[200],
-                fontWeight: FontWeight.bold,
-              ),
+
+            // Circular progress indicator
+            Stack(
+              alignment: Alignment.center,
+              children:[
+                CircularProgressIndicator(
+                  value: _updateProgress(),
+                  backgroundColor: const Color.fromARGB(255, 71, 71, 71),
+                  color: _isWorkSesh ? 
+                    const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 125, 192, 255),
+                  strokeWidth: 10,
+                  constraints: BoxConstraints.expand(
+                    width: 320,
+                    height: 320,
+                    // Adjust size as needed for various phone (tested on pixel 9pro xl)
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                      Text(
+                        _sessionType(),
+                        style: TextStyle(
+                          fontSize: 32,
+                          color: Colors.purple[200],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      // Formatted timer string
+                      Text(
+                        _formatTime(_secondsRemaining),
+                        style: const TextStyle(
+                          fontSize: 72,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
+                ) 
+              ] 
             ),
+            const SizedBox(height: 40),
             Text(
-              '$minutesStr:$secondsStr',
-              style: const TextStyle(
-                fontSize: 72,
-                color: Colors.white,
+              'Set $_currentSet of $totalSets',
+              style: TextStyle(
+                fontSize: 24,
+                color: Colors.purple[200],
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 40),
             // Start/Pause Button
             ElevatedButton(
-              onPressed: () {
-                startTimer();
-              },
+              onPressed: _startTimer,
               style: ElevatedButton.styleFrom(
-                
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.purple,
+                backgroundColor: _isRunning ? Colors.red : Colors.white,
+                foregroundColor: _isRunning ? Colors.white : Colors.purple,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              child: const Text(
-                'Start',
-                style: TextStyle(
+              child: Text(
+                _isRunning ? 'PAUSE' : 'START',
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
+            ElevatedButton(onPressed: testButton, child: const Text('TEST')),
+            // Task list display
+            TodoList(),
           ],
         ),
       ),
