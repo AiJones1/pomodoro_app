@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pomodoro_app/data/pom_model.dart';
 import 'package:pomodoro_app/pages/timer.dart';
+import 'package:pomodoro_app/components/navbar.dart';
 
 class Pomodoro extends StatefulWidget {
   const Pomodoro({super.key});
@@ -53,6 +54,7 @@ class _PomodoroState extends State<Pomodoro> {
             // Change to screenWidget when more screens are added
           ),
         ),
+        appBar: const Navbar(),
       ),
     ); 
   }

@@ -110,8 +110,9 @@ String _formatTime(int totalSeconds){
   }
 
 String _sessionType(){
-    return _isWorkSesh ? 'Focus' : 'Relax';
-  } 
+    return _isWorkSesh ? 'FOCUS' : 'RELAX';
+  }
+
 
 void testButton(){
   _nextSession();
@@ -145,25 +146,17 @@ void testButton(){
                   value: _updateProgress(),
                   backgroundColor: const Color.fromARGB(255, 71, 71, 71),
                   color: _isWorkSesh ? 
-                    const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 125, 192, 255),
+                    const Color.fromARGB(255, 197, 196, 196) : const Color.fromARGB(255, 125, 192, 255),
                   strokeWidth: 10,
                   constraints: BoxConstraints.expand(
-                    width: 320,
-                    height: 320,
+                    width: 300,
+                    height: 290,
                     // Adjust size as needed for various phone (tested on pixel 9pro xl)
                   ),
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                      Text(
-                        _sessionType(),
-                        style: TextStyle(
-                          fontSize: 32,
-                          color: Colors.purple[200],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                       // Formatted timer string
                       Text(
                         _formatTime(_secondsRemaining),
@@ -177,36 +170,66 @@ void testButton(){
                 ) 
               ] 
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 10),
+            Text(
+              _sessionType(),
+              style: TextStyle(
+                fontSize: 32,
+                color: const Color.fromARGB(255, 252, 252, 252),
+              ),
+            ),
             Text(
               'Set $_currentSet of $totalSets',
               style: TextStyle(
                 fontSize: 24,
-                color: Colors.purple[200],
+                color: const Color.fromARGB(255, 252, 252, 252),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 40),
+            // const SizedBox(height: 40),
             // Start/Pause Button
-            ElevatedButton(
-              onPressed: _startTimer,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                backgroundColor: _isRunning ? Colors.red : Colors.white,
-                foregroundColor: _isRunning ? Colors.white : Colors.purple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 20,
+              children: [
+                ElevatedButton(
+                  onPressed: _startTimer,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    backgroundColor: _isRunning ? Colors.red : Colors.white,
+                    foregroundColor: _isRunning ? Colors.white : Colors.purple,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: Text(
+                    _isRunning ? 'PAUSE' : 'START',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                _isRunning ? 'PAUSE' : 'START',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            ElevatedButton(onPressed: testButton, child: const Text('TEST')),
+                ElevatedButton(
+                  onPressed: _resetTimer,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.purple,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ), 
+                  child: const Text(
+                    'Reset',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  ), 
+                ElevatedButton(onPressed: testButton, child: const Text('TEST')),                                
+              ]),
             // Task list display
             TodoList(),
           ],
