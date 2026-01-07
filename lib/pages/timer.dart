@@ -21,6 +21,7 @@ class _TimerScreenState extends State<TimerScreen> {
   int _secondsRemaining = 0;
   bool _isWorkSesh = true;
   bool _isRunning = false;
+  bool _transitioning = false;
   
   int totalSets = 4;      // Initially hard coded, may allow users to change later
 
@@ -98,9 +99,22 @@ class _TimerScreenState extends State<TimerScreen> {
      } 
     }
   }
+void _transitionTimer(){
+  setState(() {
+    _secondsRemaining = 10;
+
+  });
+}
+
 double _updateProgress(){
+  if(!_transitioning){
     double total = _isWorkSesh ? widget.config.totalSeconds.toDouble() : widget.config.breakSeconds.toDouble();
     return _secondsRemaining / total;
+  }else{
+    double left = (_secondsRemaining-10).toDouble().abs();
+    return left / 10.0;
+  }
+    
   }
 
 String _formatTime(int totalSeconds){
@@ -115,7 +129,7 @@ String _sessionType(){
 
 
 void testButton(){
-  _nextSession();
+  _transitionTimer();
 }
 
 @override

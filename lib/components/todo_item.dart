@@ -4,14 +4,14 @@ class TodoItem extends StatefulWidget {
   final String item;
   final int index;
   final Function(int) onItemCompleted;
-  final Function(int) onItemUncompleted;
+
 
   const TodoItem({
     super.key,
     required this.item,
     required this.index,
     required this.onItemCompleted,
-    required this.onItemUncompleted,
+
   });
 
   @override
@@ -30,9 +30,7 @@ class _TodoItemState extends State<TodoItem> {
           width: 1,
         ),
         borderRadius: BorderRadius.circular(10),
-        color: _isChecked 
-          ? const Color.fromARGB(255, 100, 100, 100) // Grey when completed
-          : const Color.fromARGB(255, 193, 127, 255), // Purple when active
+        color: const Color.fromARGB(255, 193, 127, 255), // Purple when active
       ),
       padding: const EdgeInsets.all(2.0),
       margin: const EdgeInsets.symmetric(vertical: 2.5, horizontal: 1.0),
@@ -47,7 +45,7 @@ class _TodoItemState extends State<TodoItem> {
               (widget.index + 1).toString(),
               style: TextStyle(
                 fontSize: 16,
-                color: _isChecked ? Colors.grey[400] : Colors.white,
+                color:  Colors.white,
               ),
             ),
           ),
@@ -60,8 +58,7 @@ class _TodoItemState extends State<TodoItem> {
                 widget.item,
                 style: TextStyle(
                   fontSize: 16,
-                  color: _isChecked ? Colors.grey[400] : Colors.white,
-                  decoration: _isChecked ? TextDecoration.lineThrough : TextDecoration.none,
+                  color:  Colors.white,
                 ),
               ),
             ),
@@ -72,14 +69,12 @@ class _TodoItemState extends State<TodoItem> {
             value: _isChecked,
             onChanged: (bool? value) {
               setState(() {
-                _isChecked = value ?? false;
+                _isChecked = value!;
                 
                 // Call the appropriate callback
                 if (_isChecked) {
                   widget.onItemCompleted(widget.index);
-                } else {
-                  widget.onItemUncompleted(widget.index);
-                }
+                } 
               });
             },
             activeColor: Colors.green,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pomodoro_app/components/todo_item.dart';
+import 'package:pomodoro_app/data/completed_item.dart';
 
 class TodoList extends StatefulWidget {
   const TodoList({super.key});
@@ -16,7 +17,10 @@ class _TodoListState extends State<TodoList> {
   List<String> todoItems = [
     'Example Task 1'
   ];
-  List<String> completedItems =[];
+  // Need adjust later to add to completed items with pomodoro sets
+
+  // List<CompletedItem> completedItems =[];
+  List<String> completedItems = [];
 
   final TextEditingController _textFieldController = TextEditingController();
   bool _isAddingItem = false;
@@ -52,14 +56,10 @@ class _TodoListState extends State<TodoList> {
       final item = todoItems[index];
       todoItems.removeAt(index);
       completedItems.add(item);
+      // print('completed item: $item at index $index');
+      // print('Completed items list: $completedItems' );
+      // print('To-do items list: $todoItems' );
 
-
-    });
-  }
-  void _onItemUncompleted(int index) {
-    setState(() {
-      final item = todoItems[index];
-      completedItems.remove(item);
     });
   }
 
@@ -93,7 +93,6 @@ class _TodoListState extends State<TodoList> {
                             item: item,
                             index: index,
                             onItemCompleted: _onItemCompleted,
-                            onItemUncompleted: _onItemUncompleted,
                           );
                         }).toList(),
                       ),
