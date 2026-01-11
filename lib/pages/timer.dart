@@ -24,7 +24,7 @@ class _TimerScreenState extends State<TimerScreen> {
   bool _middleSetTransition = false;
   String _session = 'work'; // 'break' or 'transition'
   int totalSets = 4;
-  int _transitionSeconds =6;      // Initially hard coded, may allow users to change later
+  final int _transitionSeconds =6;      // Initially hard coded, may allow users to change later
 
   // Tracking stage of pomodoro
   int _currentSet = 1;
