@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pomodoro_app/components/todo_item.dart';
-import 'package:pomodoro_app/data/completed_item.dart';
 
 class TodoList extends StatefulWidget {
   const TodoList({super.key});
