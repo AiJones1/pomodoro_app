@@ -164,6 +164,8 @@ String _formatTime(int totalSeconds){
         return 'Break';
       case 'transition':
         return 'Ready in ...';
+      case 'start':
+        return 'Pomodoro Session';
       default:
         return '';
     }
@@ -189,13 +191,29 @@ String _formatTime(int totalSeconds){
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
+      height: MediaQuery.of(context).size.height * 0.9,
       child: Container(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Pomodoro Timer Display
-
+              Text(
+              _sessionLabel(),
+              style: TextStyle(
+                fontSize: 35,
+                color: const Color.fromARGB(255, 252, 252, 252),
+                fontWeight: FontWeight.w500,
+                shadows: [
+                  Shadow(
+                    offset: Offset(2.0, 2.0),
+                    blurRadius: 5.0,
+                    color: const Color.fromARGB(115, 0, 0, 0),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
             // Circular progress indicator
             Stack(
               alignment: Alignment.center,
@@ -228,13 +246,7 @@ String _formatTime(int totalSeconds){
               ] 
             ),
             const SizedBox(height: 10),
-            Text(
-              _sessionLabel(),
-              style: TextStyle(
-                fontSize: 32,
-                color: const Color.fromARGB(255, 252, 252, 252),
-              ),
-            ),
+
             Text(
               'Set $_currentSet of $totalSets',
               style: TextStyle(

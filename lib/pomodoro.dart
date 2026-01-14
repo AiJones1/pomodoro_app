@@ -38,23 +38,31 @@ class _PomodoroState extends State<Pomodoro> {
 
     return MaterialApp(
       home: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF8A2BE2), 
-                Color(0xFF4B0082), 
-              ],
+        body: Column(
+
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF8A2BE2), 
+                    Color(0xFF4B0082), 
+                  ],
+                ),
+              ),
+              child: Column(
+                children: [
+                  screenWidget,
+                  const Navbar(),
+                  // Change to screenWidget when more screens are added
+                ],
+              ),
             ),
-          ),
-          child: Center(
-            child: screenWidget,
-            // Change to screenWidget when more screens are added
-          ),
+          ],
         ),
-        appBar: const Navbar(),
+
       ),
     ); 
   }

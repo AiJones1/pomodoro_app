@@ -53,7 +53,7 @@ class _TodoListState extends State<TodoList> {
   void _onItemCompleted(int index) {
     setState(() {
       final item = todoItems[index];
-      todoItems.removeAt(index);
+      todoItems.remove(item);
       completedItems.add(item);
       // print('completed item: $item at index $index');
       // print('Completed items list: $completedItems' );

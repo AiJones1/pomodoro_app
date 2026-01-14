@@ -5,10 +5,40 @@ class Navbar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      title: const Text('Pomodoro App'),
-      
-      backgroundColor: const Color(0xFF4B0082),
+    return SizedBox(
+      child: Container(
+        width: double.infinity,
+        height: MediaQuery.of(context).size.height * 0.1,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF8A2BE2), 
+              Color(0xFF4B0082), 
+            ],
+          ),
+          borderRadius: BorderRadius.only(
+            
+            topLeft: Radius.circular(10),
+            topRight: Radius.circular(10),
+          ),
+        ),
+        
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text(
+              'Pomodoro App',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
   @override
