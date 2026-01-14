@@ -16,7 +16,10 @@ class _TodoListState extends State<TodoList> {
   List<String> todoItems = [
     'Example Task 1'
   ];
-  List<String> completedItems =[];
+  // Need adjust later to add to completed items with pomodoro sets
+
+  // List<CompletedItem> completedItems =[];
+  List<String> completedItems = [];
 
   final TextEditingController _textFieldController = TextEditingController();
   bool _isAddingItem = false;
@@ -45,23 +48,17 @@ class _TodoListState extends State<TodoList> {
       });
     }
 
-// Handle when an item is checked (marked as completed)
+// change how items are removed
+  // Problem when removing earlier items
   void _onItemCompleted(int index) {
     setState(() {
       final item = todoItems[index];
+      todoItems.remove(item);
       completedItems.add(item);
+      // print('completed item: $item at index $index');
+      // print('Completed items list: $completedItems' );
+      // print('To-do items list: $todoItems' );
 
-      
-      // Optional: You can remove the item from todoItems if you want
-      // todoItems.removeAt(index);
-    });
-  }
-
-  // Handle when an item is unchecked (marked as active again)
-  void _onItemUncompleted(int index) {
-    setState(() {
-      final item = todoItems[index];
-      completedItems.remove(item);
     });
   }
 
@@ -69,142 +66,145 @@ class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-              child: Container(
-                margin: EdgeInsets.all(20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'To-Do List',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+              height: 250, 
+              child: SingleChildScrollView(
+
+                child: Container(
+                  margin: EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'To-Do List',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Column(
-                      children: todoItems.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final item = entry.value;
-                        
-                        return TodoItem(
-                          item: item,
-                          index: index,
-                          onItemCompleted: _onItemCompleted,
-                          onItemUncompleted: _onItemUncompleted,
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 10),
-
-
-                    // Conditional display of text field and buttons
-                    if(_isAddingItem)
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 196, 196, 196),
-                            width: 1,
+                      const SizedBox(height: 10),
+                      Column(
+                        children: todoItems.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final item = entry.value;
+                          
+                          return TodoItem(
+                            item: item,
+                            index: index,
+                            onItemCompleted: _onItemCompleted,
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 10),
+                
+                
+                      // Conditional display of text field and buttons
+                      if(_isAddingItem)
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color.fromARGB(255, 196, 196, 196),
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            color: const Color.fromARGB(255, 193, 127, 255),
                           ),
-                          borderRadius: BorderRadius.circular(10),
-                          color: const Color.fromARGB(255, 193, 127, 255),
-                        ),
-                        padding: const EdgeInsets.all(8.0),
-                        margin: const EdgeInsets.symmetric(vertical: 5.0),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 10,
-                              height: 30,
-                              alignment: Alignment.center,
-                              child: Text(
-                                '${todoItems.length + 1}.',
-                                style: const TextStyle(fontSize: 16
-                                ), 
-                              ),
-                            ),
-                            Expanded(child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextField(
-                                  controller: _textFieldController,
-                                  autofocus: true,
-                                  style: const TextStyle(fontSize: 16, color: Colors.white),
-                                  decoration: const InputDecoration(
-                                    hintText: 'Enter new task',
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.zero,
-                                ),
-                                onSubmitted: (value) => _saveNewItem(),
-                                ),
-                              ),
-                            ),
-                            // Save and Cancel buttons
-                            IconButton(
-                              icon: const Icon(Icons.check, color: Colors.white),
-                              onPressed: _saveNewItem,
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close, color: Colors.white),
-                              onPressed: _cancel,
-                            ),
-                          ],
-                        ),
-                      )
-                  else
-                    // Add Item button
-                    GestureDetector(
-                      onTap: _addNewItem,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 196, 196, 196),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                          color: const Color.fromARGB(255, 193, 127, 255),
-                        ),
-                        padding: const EdgeInsets.all(2.0),
-                        margin: const EdgeInsets.symmetric(vertical: 2.5, horizontal: 1.0),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              alignment: Alignment.center,
-                              child: const Icon(
-                                Icons.add,
-                                size: 20,
-                              ),
-                            ),
-                            const Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
+                          margin: const EdgeInsets.symmetric(vertical: 5.0),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 10,
+                                height: 30,
+                                alignment: Alignment.center,
                                 child: Text(
-                                  'Add new item...',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                    fontStyle: FontStyle.italic,
+                                  '${todoItems.length + 1}.',
+                                  style: const TextStyle(fontSize: 16
+                                  ), 
+                                ),
+                              ),
+                              Expanded(child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: TextField(
+                                    controller: _textFieldController,
+                                    autofocus: true,
+                                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                                    decoration: const InputDecoration(
+                                      hintText: 'Enter new task',
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.zero,
+                                  ),
+                                  onSubmitted: (value) => _saveNewItem(),
                                   ),
                                 ),
                               ),
-                            ),
-                            // Empty checkbox placeholder for consistent layout
-                            Container(
-                              width: 40,
-                              height: 40,
-                              alignment: Alignment.center,
-                              child: const Icon(
-                                Icons.add_circle_outline,
-                                color: Colors.white,
+                              // Save and Cancel buttons
+                              IconButton(
+                                icon: const Icon(Icons.check, color: Colors.white),
+                                onPressed: _saveNewItem,
                               ),
+                              IconButton(
+                                icon: const Icon(Icons.close, color: Colors.white),
+                                onPressed: _cancel,
+                              ),
+                            ],
+                          ),
+                        )
+                    else
+                      // Add Item button
+                      GestureDetector(
+                        onTap: _addNewItem,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color.fromARGB(255, 196, 196, 196),
+                              width: 1,
                             ),
-                          ],
+                            borderRadius: BorderRadius.circular(10),
+                            color: const Color.fromARGB(255, 193, 127, 255),
+                          ),
+                          padding: const EdgeInsets.all(2.0),
+                          margin: const EdgeInsets.symmetric(vertical: 2.5, horizontal: 1.0),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 30,
+                                height: 30,
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  Icons.add,
+                                  size: 20,
+                                ),
+                              ),
+                              const Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'Add new item...',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Empty checkbox placeholder for consistent layout
+                              Container(
+                                width: 40,
+                                height: 40,
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  Icons.add_circle_outline,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               )
           );

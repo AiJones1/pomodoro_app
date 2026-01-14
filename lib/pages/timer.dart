@@ -18,16 +18,18 @@ class TimerScreen extends StatefulWidget {
 class _TimerScreenState extends State<TimerScreen> {
 
 // Variables
-  int _secondsRemaining = 0;
-  bool _isWorkSesh = true;
+  int _secondsRemaining = 10;
+  Timer? _timer;
   bool _isRunning = false;
-  
-  int totalSets = 4;      // Initially hard coded, may allow users to change later
+  bool _middleSetTransition = false;
+  String _session = 'work'; // 'break' or 'transition'
+  int totalSets = 4;
+  final int _transitionSeconds =6;      // Initially hard coded, may allow users to change later
 
   // Tracking stage of pomodoro
   int _currentSet = 1;
 
-  Timer?_timer; // can be null whilst developing
+
 
 // Functions
 @override
@@ -41,9 +43,10 @@ class _TimerScreenState extends State<TimerScreen> {
     }
     setState(() {
       _isRunning = false;
-      _isWorkSesh = true;
-      _secondsRemaining = widget.config.totalSeconds;
+      _session = 'start';
       _currentSet = 1;
+      _middleSetTransition = false;
+      _secondsRemaining = widget.config.totalSeconds;
     });
   }
 
@@ -57,12 +60,22 @@ class _TimerScreenState extends State<TimerScreen> {
     });
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if(_secondsRemaining > 0){
+      if (_secondsRemaining == 0) {
         setState(() {
-          _secondsRemaining--;
+          if(_session =='break' && _currentSet == totalSets){
+            timer.cancel();
+          }else{
+            _nextSession();
+          }
         });
       } else {
-          _nextSession();
+        setState(() {
+          if(_session == 'start'){
+            _session = 'transition';
+            _secondsRemaining = _transitionSeconds;
+          }
+          _secondsRemaining--;
+        });
       }
     });
   }
@@ -74,48 +87,96 @@ class _TimerScreenState extends State<TimerScreen> {
     _timer?.cancel();
   }
 
-  void _nextSession(){
-    if(_isWorkSesh){
-      setState(() {
-        _isWorkSesh = false;
-        _secondsRemaining = widget.config.breakSeconds;
-      });
-    }else{
-      if(_currentSet < totalSets){
-        // Check if more sets remain
-        setState(() {
-          _currentSet++;
-          _isWorkSesh = true;
-          _secondsRemaining = widget.config.totalSeconds;
-        });
-        // Else end pomodoro
+  void _nextSession() {
+    // Prevent bugs from next session logic
+    if(_session == 'start') {
+      _session = 'transition';
+      _secondsRemaining = _transitionSeconds;
+      return;
+    }
+    if(_session == 'break' && _currentSet == totalSets){
+      return;
+    }
+    if (_session == 'transition') {
+      if(!_middleSetTransition){
+        _middleSetTransition = true;
+        _session = 'work';
+        _secondsRemaining = widget.config.totalSeconds;
       } else {
-      _timer?.cancel();
-        setState(() {
-          _resetTimer();
-          _isRunning = false;
-        });
-     } 
+        _middleSetTransition = false;
+        _session = 'break';
+        _secondsRemaining = widget.config.breakSeconds;
+      }
+    }else if(_session == 'work'){
+      _session = 'transition';
+      _secondsRemaining = _transitionSeconds;
+    }else if(_session == 'break'){
+      _currentSet++;
+      _session = 'transition';
+      _secondsRemaining = _transitionSeconds;
     }
   }
+
 double _updateProgress(){
-    double total = _isWorkSesh ? widget.config.totalSeconds.toDouble() : widget.config.breakSeconds.toDouble();
-    return _secondsRemaining / total;
+    if(_session == 'transition') {
+      double total = 10.0;
+      return (_secondsRemaining-total).toDouble().abs() / total;
+    }else{
+      double total = _secondsRemaining.toDouble();
+      switch(_session){
+        case 'work':
+          total = widget.config.totalSeconds.toDouble();
+          break;
+        case 'break':
+          total = widget.config.breakSeconds.toDouble();
+          break;
+        default:
+          total = 1.0;
+      }
+      return _secondsRemaining / total;
+    }
   }
 
 String _formatTime(int totalSeconds){
     int minutes = totalSeconds ~/ 60;
     int seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2,'0')}:${seconds.toString().padLeft(2,'0')}';
+    return '${minutes.toString().padLeft(1,'0')}:${seconds.toString().padLeft(2,'0')}';
   }
 
-String _sessionType(){
-    return _isWorkSesh ? 'Focus' : 'Relax';
-  } 
+  Color _sessionColor() {
+    switch (_session) {
+      case 'work':
+        return Colors.red;
+      case 'break':
+        return Colors.green;
+      case 'transition':
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
+  }
 
-void testButton(){
-  _nextSession();
-}
+  String _sessionLabel() {
+    switch (_session) {
+      case 'work':
+        return 'Focus Time';
+      case 'break':
+        return 'Break';
+      case 'transition':
+        return 'Ready in ...';
+      case 'start':
+        return 'Pomodoro Session';
+      default:
+        return '';
+    }
+  }
+  
+  
+   // testing timer with UI
+  void testButton(){
+    // Change as needed
+    _nextSession();
+  } 
 
 @override
   void dispose(){
@@ -130,13 +191,29 @@ void testButton(){
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
+      height: MediaQuery.of(context).size.height * 0.9,
       child: Container(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Pomodoro Timer Display
-
+              Text(
+              _sessionLabel(),
+              style: TextStyle(
+                fontSize: 35,
+                color: const Color.fromARGB(255, 252, 252, 252),
+                fontWeight: FontWeight.w500,
+                shadows: [
+                  Shadow(
+                    offset: Offset(2.0, 2.0),
+                    blurRadius: 5.0,
+                    color: const Color.fromARGB(115, 0, 0, 0),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
             // Circular progress indicator
             Stack(
               alignment: Alignment.center,
@@ -144,26 +221,17 @@ void testButton(){
                 CircularProgressIndicator(
                   value: _updateProgress(),
                   backgroundColor: const Color.fromARGB(255, 71, 71, 71),
-                  color: _isWorkSesh ? 
-                    const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 125, 192, 255),
+                  color: _sessionColor(),
                   strokeWidth: 10,
                   constraints: BoxConstraints.expand(
-                    width: 320,
-                    height: 320,
+                    width: 300,
+                    height: 290,
                     // Adjust size as needed for various phone (tested on pixel 9pro xl)
                   ),
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                      Text(
-                        _sessionType(),
-                        style: TextStyle(
-                          fontSize: 32,
-                          color: Colors.purple[200],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                       // Formatted timer string
                       Text(
                         _formatTime(_secondsRemaining),
@@ -177,36 +245,60 @@ void testButton(){
                 ) 
               ] 
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 10),
+
             Text(
               'Set $_currentSet of $totalSets',
               style: TextStyle(
                 fontSize: 24,
-                color: Colors.purple[200],
+                color: const Color.fromARGB(255, 252, 252, 252),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 40),
+            // const SizedBox(height: 40),
             // Start/Pause Button
-            ElevatedButton(
-              onPressed: _startTimer,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                backgroundColor: _isRunning ? Colors.red : Colors.white,
-                foregroundColor: _isRunning ? Colors.white : Colors.purple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 20,
+              children: [
+                ElevatedButton(
+                  onPressed: _startTimer,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    backgroundColor: _isRunning ? Colors.red : Colors.white,
+                    foregroundColor: _isRunning ? Colors.white : Colors.purple,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: Text(
+                    _isRunning ? 'PAUSE' : 'START',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                _isRunning ? 'PAUSE' : 'START',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            ElevatedButton(onPressed: testButton, child: const Text('TEST')),
+                ElevatedButton(
+                  onPressed: _resetTimer,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.purple,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ), 
+                  child: const Text(
+                    'Reset',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  ), 
+                ElevatedButton(onPressed: testButton, child: const Text('TEST')),                                
+              ]),
             // Task list display
             TodoList(),
           ],
