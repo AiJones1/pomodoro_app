@@ -9,37 +9,51 @@ class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key, required this.config});
   
   @override
-  State<TimerScreen> createState(){
-    return _TimerScreenState();
+  TimerScreenState createState(){
+    return TimerScreenState();
   }
 }
 
 
-class _TimerScreenState extends State<TimerScreen> {
-
+class TimerScreenState extends State<TimerScreen> {
+  void resetTimer() {
+    _resetTimer();
+  }
 // Variables
   int _secondsRemaining = 10;
   Timer? _timer;
   bool _isRunning = false;
   bool _middleSetTransition = false;
   String _session = 'work'; // 'break' or 'transition'
-  int totalSets = 4;
-  final int _transitionSeconds =6;      // Initially hard coded, may allow users to change later
-
-  // Tracking stage of pomodoro
+  int get totalSets => widget.config.totalSets; // Use config value
+  final int _transitionSeconds = 6;
   int _currentSet = 1;
 
 
 
 // Functions
+  // Extra fn to handle config changes  
+  @override
+  void didUpdateWidget(TimerScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Check if config actually changed
+    if (oldWidget.config.workDuration != widget.config.workDuration ||
+        oldWidget.config.breakDuration != widget.config.breakDuration ||
+        oldWidget.config.totalSets != widget.config.totalSets) {
+      _resetTimer();
+    }
+  }
+
 @override
   void initState(){
     super.initState();
     _resetTimer();
   }
+
   void _resetTimer(){
     if(_timer != null){
       _timer!.cancel();
+      _timer = null;
     }
     setState(() {
       _isRunning = false;

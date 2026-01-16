@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pomodoro_app/data/pom_model.dart';
 import 'package:pomodoro_app/pages/timer.dart';
+import 'package:pomodoro_app/pages/settings.dart';
 import 'package:pomodoro_app/components/navbar.dart';
 
 class Pomodoro extends StatefulWidget {
@@ -13,59 +14,66 @@ class Pomodoro extends StatefulWidget {
 }
 
 class _PomodoroState extends State<Pomodoro> {
-
-// Variables
+  // Variables
   var activeScreen = 'timer-screen';
-  late final PomodoroConfig _currentConfig = PresetConfigs.defaultConfig;
+  late PomodoroConfig _currentConfig = PresetConfigs.defaultConfig;
 
-// Functions
+  // Functions
   void switchScreen(String screenIdentifier){
     setState(() {
       activeScreen = screenIdentifier;
     });
   }
-  // void _selectConfig(PomodoroConfig config) {
-  //   setState(() {
-  //     _currentConfig = config;
-  //   });
-  // }
+  
+  void _selectConfig(PomodoroConfig config) {
+    setState(() {
+      _currentConfig = config;
+      activeScreen = 'timer-screen';
+    });
+  }
 
-// Elements and styles  
   @override
-  Widget build( context) {
-    Widget screenWidget = TimerScreen(config: _currentConfig); // Update later to be welcome screen or setup
-
+  Widget build(BuildContext context) {
+    Widget screenWidget;
+    
+    switch (activeScreen) {
+      case 'settings-screen':
+        screenWidget = SettingsScreen(
+          currentConfig: _currentConfig,
+          onConfigChanged: _selectConfig,
+        );
+        break;
+      case 'timer-screen':
+      default:
+        screenWidget = TimerScreen(
+          config: _currentConfig,
+          key: ValueKey(_currentConfig.hashCode), // This ensures widget rebuilds
+        );
+    }
 
     return MaterialApp(
       home: Scaffold(
         body: Column(
-
           children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF8A2BE2), 
-                    Color(0xFF4B0082), 
-                  ],
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF8A2BE2), 
+                      Color(0xFF4B0082), 
+                    ],
+                  ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  screenWidget,
-                  const Navbar(),
-                  // Change to screenWidget when more screens are added
-                ],
+                child: screenWidget,
               ),
             ),
+            Navbar(onNavigate: switchScreen),
           ],
         ),
-
       ),
     ); 
   }
 }
-
-

@@ -1,46 +1,36 @@
 import 'package:flutter/material.dart';
 
-class Navbar extends StatelessWidget implements PreferredSizeWidget {
-  const Navbar({super.key});
-
+class Navbar extends StatelessWidget {
+  final Function(String) onNavigate;
+  
+  const Navbar({
+    super.key,
+    required this.onNavigate,
+  });
+  
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      child: Container(
-        width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.1,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF8A2BE2), 
-              Color(0xFF4B0082), 
-            ],
-          ),
-          borderRadius: BorderRadius.only(
-            
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(10),
-          ),
+    return BottomNavigationBar(
+      backgroundColor: const Color(0xFF4B0082),
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.purple[200],
+      onTap: (index) {
+        if (index == 0) {
+          onNavigate('timer-screen');
+        } else if (index == 1) {
+          onNavigate('settings-screen');
+        }
+      },
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.timer),
+          label: 'Timer',
         ),
-        
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text(
-              'Pomodoro App',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
+        BottomNavigationBarItem(
+          icon: Icon(Icons.settings),
+          label: 'Settings',
         ),
-      ),
+      ],
     );
   }
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight); 
 }
