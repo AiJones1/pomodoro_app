@@ -201,19 +201,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
-              Text('Current Config: ',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Colors.white,
-                ),
-              ),
-              Text('Work: $_workDuration min, Break $_breakDuration min, Sets: $_totalSets',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
+              // SizedBox(height: 10),
+              // Text('Current Config: ',
+              //   style: TextStyle(
+              //     fontSize: 24,
+              //     color: Colors.white,
+              //   ),
+              // ),
+              // Text('Work: $_workDuration min, Break $_breakDuration min, Sets: $_totalSets',
+              //   style: TextStyle(
+              //     fontSize: 20,
+              //     color: Colors.white,
+              //   ),
+              // ),
 
             ],
           ),

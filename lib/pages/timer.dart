@@ -133,7 +133,7 @@ class TimerScreenState extends State<TimerScreen> {
 
 double _updateProgress(){
     if(_session == 'transition') {
-      double total = 10.0;
+      double total = _transitionSeconds.toDouble();
       return (_secondsRemaining-total).toDouble().abs() / total;
     }else{
       double total = _secondsRemaining.toDouble();
@@ -208,9 +208,11 @@ String _formatTime(int totalSeconds){
       height: MediaQuery.of(context).size.height * 0.9,
       child: Container(
         padding: const EdgeInsets.all(20.0),
+
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+              SizedBox(height: 10),
             // Pomodoro Timer Display
               Text(
               _sessionLabel(),
@@ -227,7 +229,7 @@ String _formatTime(int totalSeconds){
                 ],
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             // Circular progress indicator
             Stack(
               alignment: Alignment.center,
@@ -259,7 +261,7 @@ String _formatTime(int totalSeconds){
                 ) 
               ] 
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
 
             Text(
               'Set $_currentSet of $totalSets',
@@ -310,11 +312,14 @@ String _formatTime(int totalSeconds){
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  ), 
-                ElevatedButton(onPressed: testButton, child: const Text('TEST')),                                
+                  ),                               
               ]),
             // Task list display
-            TodoList(),
+            Expanded(
+              flex: 1, 
+              child: TodoList()
+              ),
+              
           ],
         ),
       ),
